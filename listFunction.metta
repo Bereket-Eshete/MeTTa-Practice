@@ -53,3 +53,20 @@
     ;(+ 1 5)
     ;6
 !(foldr max 0 (cons 1(cons 2 (cons 8 Nil))))
+;revers list function 
+(=(reverse Nil) Nil)
+(=(reverse (cons $x $xs))
+    (append (reverse $xs) (cons $x Nil)))
+(=(append Nil $ys) $ys)
+(=(append (cons $x $xs) $ys)
+    (cons $x (append $xs $ys)))
+
+!(reverse (cons a(cons b Nil)))
+;!(reverse (cons 1(cons 2 (cons 3 Nil))))
+;[1,2,3]
+;append reverse([2,3]) [1]
+;append (append reverse([3]) [2]) [1]
+;append (append (append reverse([]) [3]) [2]) [1]
+;append (append (append [] [3]) [2]) [1]
+;append ([3] [2]) [1]
+;append [3,2] [1]
