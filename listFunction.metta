@@ -16,7 +16,7 @@
 !(length (cons 1 (cons 2 (cons 3 Nil))))       ; Result: 3
 
 
-;; MAP FUNCTION                                                          ;;
+;; MAP FUNCTION                                                         
 ;; Applies a function to every element in a list
 ;; Base case: mapping over empty list returns empty list
 (= (map $f Nil) Nil)
