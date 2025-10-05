@@ -2,11 +2,12 @@
 ;; MeTTa List Functions - Practice Implementation                        ;;
 ;; A collection of fundamental list manipulation functions               ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+;; Define a polymorphic list type
 (: List (-> $a Type))
 (: Nil (List $a))
 (: Cons (-> $a (List $a) (List $a)))
-;; LENGTH FUNCTION                                                       ;;
+
+;; LENGTH FUNCTION                                                       
 ;; Calculates the number of elements in a list
 ;; Base case: empty list has length 0
 (: length (-> (List $a) Number))
@@ -17,7 +18,6 @@
 
 !(length Nil)                                  ; Result: 0
 !(length (Cons 1 (Cons 2 (Cons 3 Nil))))       ; Result: 3
-
 
 ;; MAP FUNCTION                                                         
 ;; Applies a function to every element in a list
@@ -34,10 +34,6 @@
 (= (square $n) (* $n $n))
 
 !(map square (Cons 1 (Cons 2 (Cons 3 Nil))))   ; Result: [1, 4, 9]
-;(Cons (square 1) (map square (Cons 2 (Cons 3 Nil))))
-;(Cons 1 (Cons (square 2) (map sqaure (Cons 3 Nil))))
-;(Cons 1 (Cons 4 (Cons (square 3) (map square Nil))))
-;(Cons 1 (Cons 4 (Cons 9 Nil)))
 
 ;; FOLD LEFT FUNCTION                                                    ;;
 ;; Reduces a list from left to right using a binary function
@@ -48,12 +44,6 @@
    (foldl $f ($f $i $x) $xs))
 !(foldl + 0 Nil)                              ; Result: 0
 !(foldl + 0 (Cons 1 (Cons 2 (Cons 3 Nil))))   ; Result: 6
-;(foldl + (+ 0 1) (Cons 2 (Cons 3 Nil)))
-;(foldl + (+ 1 2) (Cons 3 Nil))
-;(foldl + (+ 3 3) Nil)
-;(foldl + 6 Nil)
-;6 
-
 
 ;; FOLD RIGHT FUNCTION                                                   ;;
 ;; Reduces a list from right to left using a binary function
@@ -69,10 +59,8 @@
 (= (max $x $y)
    (if (> $x $y) $x $y))
 
-
 !(foldr + 0 (Cons 1 (Cons 8 (Cons 3 Nil))))  ; Result: 8
 !(foldr max 0 (Cons 1 (Cons 8 (Cons 3 Nil)))) ; Result: 8
-
 
 ;; REVERSE FUNCTION                                                      ;;
 ;; Reverses the order of elements in a list
@@ -91,13 +79,8 @@
 (= (append (Cons $x $xs) $ys)
    (Cons $x (append $xs $ys)))
 
-
  !(reverse (Cons 1 (Cons 2 (Cons 3 Nil))))      ; Result: [3, 2, 1]
  !(append (Cons 1 (Cons 2 Nil)) (Cons 3 Nil))   ; Result: [1, 2, 3]
-
-
-
-
 
 ;; FILTER FUNCTION                                                       ;;
 ;; Filters elements that satisfy a predicate function
@@ -130,9 +113,7 @@
            Nil
            (Cons (head $xs) (take (- $n 1) (tail $xs))))))
 
-;; Test it!
 ! (take 2 (Cons 1 (Cons 2 (Cons 3 (Cons 4 Nil)))))
-; Should return ONLY: (Cons 1 (Cons 2 Nil))
 
 ;; MEMBER FUNCTION                                                       
 ;; Checks if an element exists in a list
@@ -147,11 +128,10 @@
 !(member 3 (Cons 1 (Cons 2 (Cons 3 Nil))))                     ; Result: True
 !(member 5 (Cons 1 (Cons 2 (Cons 3 Nil))))                     ; Result: False
 
-
 ;; Renamed functions for clarity
 (: unique-list (-> (List $a) (List $a)))
 (= (unique-list $list)
-   (reverse (build-unique $list Nil)))  ; ← ADDED REVERSE HERE
+   (reverse (build-unique $list Nil)))  
 
 (: build-unique (-> (List $a) (List $a) (List $a)))
 (= (build-unique Nil $unique-so-far) $unique-so-far)
@@ -159,6 +139,5 @@
    (if (member $current $unique-so-far)
        (build-unique $remaining $unique-so-far)          
        (build-unique $remaining (Cons $current $unique-so-far)))) 
-
 
 ! (unique-list (Cons 1 (Cons 2 (Cons 2 (Cons 3 (Cons 1 (Cons 4 Nil)))))))
