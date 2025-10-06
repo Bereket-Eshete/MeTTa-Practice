@@ -93,3 +93,29 @@
 ! (expr-substitute (calculate (+ x y)) x 5)
 ; Should return: (calculate (+ 5 y))
 ! (expr-substitute (f (g x) (h y)) y z)
+
+
+(: append (-> (List $a) (List $a) (List $a)))
+(= (append Nil $ys) $ys)
+;; Recursive case: prepend head of first list, append tail to second list
+(= (append (Cons $x $xs) $ys)
+   (Cons $x (append $xs $ys)))
+(: expr-flatten (-> Expression (List Atom)))
+(= (expr-flatten $expr)
+  (case $expr
+    (
+      (($op $arg1 $arg2)
+       (append (Cons $op Nil)
+               (append (expr-flatten $arg1)
+                       (expr-flatten $arg2))))
+      (($op $arg1)
+       (append (Cons $op Nil)
+               (expr-flatten $arg1)))
+      ($atom (Cons $atom Nil))
+    )
+  )
+)
+
+! (expr-flatten (implies (human Socrates) (mortal Socrates)))
+; Returns: [implies, human, Socrates, mortal, Socrates]
+! (expr-flatten (and (or A B) (and C D))) 
