@@ -13,8 +13,8 @@
   )
 )
 
-! (expr-size (implies (human Socrates) (mortal Socrates))) 
-! (expr-size (human abebe))
+! (expr-size (implies (human Socrates) (mortal Socrates))) ;Result: 5
+! (expr-size (human Jhon))                ;Result: 2
 
 ;Helper function to get maximum of two numbers
 (: max (-> Number Number Number))
