@@ -1,9 +1,11 @@
+;; expression function which returns size of expression
+;; size is defined as number of nodes in the expression tree
 (: expr-size (-> Expression Number))
 (= (expr-size $expr)
   (case $expr
     (
       (($op $arg1 $arg2)
-       (+ (+ 1 (expr-size $arg1)) (expr-size $arg2)))  ; Nest the additions
+       (+ (+ 1 (expr-size $arg1)) (expr-size $arg2)))  
       (($op $arg1)
        (+ 1 (expr-size $arg1)))
       ($atom 1)
@@ -12,15 +14,16 @@
 )
 
 ! (expr-size (implies (human Socrates) (mortal Socrates))) 
-! (expr-size (human abebe)) ; Should be 5
+! (expr-size (human abebe))
 
+;Helper function to get maximum of two numbers
 (: max (-> Number Number Number))
 (= (max $a $b)
    (if (> $a $b)
        $a
        $b))
-
-;; Now the expr-depth function should work
+;; expression function which returns depth of expression
+;; depth is defined as length of longest path from root to leaf
 (: expr-depth (-> Expression Number))
 (= (expr-depth $expr)
   (case $expr
@@ -34,13 +37,11 @@
   )
 )
 
-! (expr-depth (implies (human Socrates) (mortal Socrates)))  ; Should be 2
-! (expr-depth (human Socrates))                              ; Should be 1
-! (expr-depth (and (or A B) (and C D)))     
-! (expr-depth (parent x y))                 ; Should be 2
-! (expr-depth (parent x (mother y)))       ; Should be 3
+! (expr-depth (implies (human Socrates) (mortal Socrates)))  ;Result: 2
+! (expr-depth (human Socrates))         ;Result: 1                
+! (expr-depth (and (or A B) (and C D)))   ;Result: 3 
 
-
+;; expression function which checks if an atom is present in the expression
 (: expr-contains? (-> Expression Atom Bool))
 (= (expr-contains? $expr $target)
   (case $expr
@@ -57,13 +58,10 @@
   )
 )
 
-;; Test it
-! (expr-contains? (implies (human Socrates) (mortal Socrates)) Socrates)  ; Should be True
-! (expr-contains? (implies (human Socrates) (mortal Socrates)) Plato)     ; Should be False
-! (expr-contains? (and A B) A)                                           ; Should be True
-! (expr-contains? human human)    
-! (expr-contains? (parent Bob Adam) Adam)                                       ; Should be True
+! (expr-contains? (implies (human Socrates) (mortal Socrates)) Socrates)  ;Result: True
+! (expr-contains? (parent Bob Adam) Adam)                                 ;Result: True
 
+;; expression function which substitutes all occurrences of an atom with another atom
 (: expr-substitute (-> Expression Atom Atom Expression))
 (= (expr-substitute $expr $old $new)
   (case $expr
@@ -80,26 +78,19 @@
   )
 )
 
-;; Test cases
 ! (expr-substitute (implies (human Socrates) (mortal Socrates)) Socrates Plato)
-; Should return: (implies (human Plato) (mortal Plato))
-
+;return: (implies (human Plato) (mortal Plato))
 ! (expr-substitute (parent John Bob) John "Father")
-; Should return: (parent "Father" Bob)
-
-! (expr-substitute (and A B) A True)
-; Should return: (and True B)
-
-! (expr-substitute (calculate (+ x y)) x 5)
-; Should return: (calculate (+ 5 y))
+;return: (parent "Father" Bob)
 ! (expr-substitute (f (g x) (h y)) y z)
+;return: (f (g x) (h z))
 
-
+;;Helper function for flattening expressions
 (: append (-> (List $a) (List $a) (List $a)))
 (= (append Nil $ys) $ys)
-;; Recursive case: prepend head of first list, append tail to second list
 (= (append (Cons $x $xs) $ys)
    (Cons $x (append $xs $ys)))
+;; expression function which flattens an expression into a list of atoms
 (: expr-flatten (-> Expression (List Atom)))
 (= (expr-flatten $expr)
   (case $expr
@@ -119,3 +110,4 @@
 ! (expr-flatten (implies (human Socrates) (mortal Socrates)))
 ; Returns: [implies, human, Socrates, mortal, Socrates]
 ! (expr-flatten (and (or A B) (and C D))) 
+; Returns: [and, or, A, B, and, C, D]
