@@ -63,3 +63,33 @@
 ! (expr-contains? (and A B) A)                                           ; Should be True
 ! (expr-contains? human human)    
 ! (expr-contains? (parent Bob Adam) Adam)                                       ; Should be True
+
+(: expr-substitute (-> Expression Atom Atom Expression))
+(= (expr-substitute $expr $old $new)
+  (case $expr
+    (
+      (($op $arg1 $arg2)
+       ((if (== $op $old) $new $op)
+        (expr-substitute $arg1 $old $new)
+        (expr-substitute $arg2 $old $new)))
+      (($op $arg1)
+       ((if (== $op $old) $new $op)
+        (expr-substitute $arg1 $old $new)))
+      ($atom (if (== $atom $old) $new $atom))
+    )
+  )
+)
+
+;; Test cases
+! (expr-substitute (implies (human Socrates) (mortal Socrates)) Socrates Plato)
+; Should return: (implies (human Plato) (mortal Plato))
+
+! (expr-substitute (parent John Bob) John "Father")
+; Should return: (parent "Father" Bob)
+
+! (expr-substitute (and A B) A True)
+; Should return: (and True B)
+
+! (expr-substitute (calculate (+ x y)) x 5)
+; Should return: (calculate (+ 5 y))
+! (expr-substitute (f (g x) (h y)) y z)
