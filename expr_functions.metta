@@ -3,6 +3,11 @@
 ;; Using get-metatype, car-atom, cdr-atom for general expressions       ;;
 ;; ===================================================================== ;;
 
+;; Define a polymorphic list type
+(: List (-> $a Type))
+(: Nil (List $a))
+(: Cons (-> $a (List $a) (List $a)))
+
 ;; Helper function to get maximum of two numbers
 (: max (-> Number Number Number))
 (= (max $a $b)
