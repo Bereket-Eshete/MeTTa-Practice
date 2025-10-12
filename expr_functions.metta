@@ -1,67 +1,79 @@
-;; expression function which returns size of expression
-;; size is defined as number of nodes in the expression tree
-(: expr-size (-> Expression Number))
-(= (expr-size $expr)
-  (case $expr
-    (
-      (($op $arg1 $arg2)
-       (+ (+ 1 (expr-size $arg1)) (expr-size $arg2)))  
-      (($op $arg1)
-       (+ 1 (expr-size $arg1)))
-      ($atom 1)
-    )
-  )
-)
+;; ===================================================================== ;;
+;; IMPROVED EXPRESSION FUNCTIONS                                         ;;
+;; Using get-metatype, car-atom, cdr-atom for general expressions       ;;
+;; ===================================================================== ;;
 
-! (expr-size (implies (human Socrates) (mortal Socrates))) ;Result: 5
-! (expr-size (human Jhon))                ;Result: 2
-
-;Helper function to get maximum of two numbers
+;; Helper function to get maximum of two numbers
 (: max (-> Number Number Number))
 (= (max $a $b)
-   (if (> $a $b)
-       $a
-       $b))
-;; expression function which returns depth of expression
-;; depth is defined as length of longest path from root to leaf
-(: expr-depth (-> Expression Number))
+   (if (> $a $b) $a $b))
+
+;;Helper function to append two lists
+(: append (-> (List $a) (List $a) (List $a)))
+(= (append Nil $ys) $ys)
+(= (append (Cons $x $xs) $ys)
+   (Cons $x (append $xs $ys)))
+
+;; ===================================================================== ;;
+;; EXPRESSION SIZE FUNCTION                                              ;;
+;; ===================================================================== ;;
+;; Uses built-in size-atom function - counts elements without nesting
+(: expr-size (-> Atom Number))
+(= (expr-size $expr)
+  (case (get-metatype $expr)
+    ((Expression (size-atom $expr))
+     ($_ 1))))
+
+!(expr-size (implies (human Socrates) (mortal Socrates)))  ; 3 elements
+!(expr-size (f a b c d))                                   ; 5 elements: 
+!(expr-size (and A B C D E F))                             ; 7 elements
+;; ===================================================================== ;;
+;; EXPRESSION DEPTH FUNCTION                                             ;;
+;; ===================================================================== ;;
+;; Calculates maximum nesting depth using recursive traversal
+(: expr-depth (-> Atom Number))
 (= (expr-depth $expr)
-  (case $expr
-    (
-      (($op $arg1 $arg2)
-       (+ 1 (max (expr-depth $arg1) (expr-depth $arg2))))
-      (($op $arg1)
-       (+ 1 (expr-depth $arg1)))
-      ($atom 0)
-    )
-  )
-)
+  (case (get-metatype $expr)
+    ((Expression
+      (if (== $expr ()) 
+          0
+          (let* (($head (car-atom $expr))
+                 ($tail (cdr-atom $expr))
+                 ($head-depth (expr-depth $head))
+                 ($tail-depth (expr-depth $tail)))
+            (max (+ 1 $head-depth) $tail-depth))))
+     ($_ 0))))
 
-! (expr-depth (implies (human Socrates) (mortal Socrates)))  ;Result: 2
-! (expr-depth (human Socrates))         ;Result: 1                
-! (expr-depth (and (or A B) (and C D)))   ;Result: 3 
+!(expr-depth (human Socrates))                             ; Should be 1
+!(expr-depth (implies (human Socrates) (mortal Socrates))) ; Should be 2
+!(expr-depth human)                                        ; Should be 0
 
-;; expression function which checks if an atom is present in the expression
-(: expr-contains? (-> Expression Atom Bool))
+;; ===================================================================== ;;
+;; EXPRESSION CONTAINS FUNCTION                                          ;;
+;; ===================================================================== ;;
+;; Checks if atom appears anywhere in expression
+(: expr-contains? (-> Atom Atom Bool))
 (= (expr-contains? $expr $target)
-  (case $expr
-    (
-      (($op $arg1 $arg2)
-       (or (== $op $target)
-           (or (expr-contains? $arg1 $target)
-               (expr-contains? $arg2 $target))))
-      (($op $arg1)
-       (or (== $op $target)
-           (expr-contains? $arg1 $target)))
-      ($atom (== $atom $target))
-    )
-  )
-)
+  (case (get-metatype $expr)
+    ((Expression
+      (if (== $expr ()) 
+          False
+          (let* (($head (car-atom $expr))
+                 ($tail (cdr-atom $expr)))
+            (or (expr-contains? $head $target)
+                (expr-contains? $tail $target)))))
+     ($_ (== $expr $target)))))
 
-! (expr-contains? (implies (human Socrates) (mortal Socrates)) Socrates)  ;Result: True
-! (expr-contains? (parent Bob Adam) Adam)                                 ;Result: True
+!(expr-contains? (human Socrates) Socrates)                   ; True
+!(expr-contains? (implies (human Socrates) (mortal Socrates)) Socrates)  ; Should be True
+!(expr-contains? (f a b c d) c)                               ; True
+!(expr-contains? human Socrates)                              ; False
+!(expr-contains? Socrates Socrates)                           ; True
 
-;; expression function which substitutes all occurrences of an atom with another atom
+;; ===================================================================== ;;
+;; EXPRESSION SUBSTITUTE FUNCTION                                        ;;
+;; ===================================================================== ;;
+;; Replaces all occurrences of atom with another atom 
 (: expr-substitute (-> Expression Atom Atom Expression))
 (= (expr-substitute $expr $old $new)
   (case $expr
@@ -77,37 +89,27 @@
     )
   )
 )
+! (expr-substitute (implies (human Socrates) (mortal Socrates)) Socrates Plato) ;(implies (human Plato) (mortal Plato))
+! (expr-substitute (parent John Bob) John "Father") ;(parent "Father" Bob)
+! (expr-substitute (f (g x) (h y)) h  z) ;(f (g x) (z y))
 
-! (expr-substitute (implies (human Socrates) (mortal Socrates)) Socrates Plato)
-;return: (implies (human Plato) (mortal Plato))
-! (expr-substitute (parent John Bob) John "Father")
-;return: (parent "Father" Bob)
-! (expr-substitute (f (g x) (h y)) y z)
-;return: (f (g x) (h z))
-
-;;Helper function for flattening expressions
-(: append (-> (List $a) (List $a) (List $a)))
-(= (append Nil $ys) $ys)
-(= (append (Cons $x $xs) $ys)
-   (Cons $x (append $xs $ys)))
-;; expression function which flattens an expression into a list of atoms
-(: expr-flatten (-> Expression (List Atom)))
+;; ===================================================================== ;;
+;; EXPRESSION FLATTEN FUNCTION                                           ;;
+;; ===================================================================== ;;
+;; Converts expression to flat list using car-atom/cdr-atom
+(: expr-flatten (-> Atom (List Atom)))
 (= (expr-flatten $expr)
-  (case $expr
-    (
-      (($op $arg1 $arg2)
-       (append (Cons $op Nil)
-               (append (expr-flatten $arg1)
-                       (expr-flatten $arg2))))
-      (($op $arg1)
-       (append (Cons $op Nil)
-               (expr-flatten $arg1)))
-      ($atom (Cons $atom Nil))
-    )
-  )
-)
+  (case (get-metatype $expr)
+    ((Expression
+      (if (== $expr ())
+          Nil
+          (let* (($head (car-atom $expr))
+                 ($tail (cdr-atom $expr)))
+            (append (expr-flatten $head)
+                    (expr-flatten $tail)))))
+     ($_ (Cons $expr Nil)))))
 
-! (expr-flatten (implies (human Socrates) (mortal Socrates)))
-; Returns: [implies, human, Socrates, mortal, Socrates]
-! (expr-flatten (and (or A B) (and C D))) 
-; Returns: [and, or, A, B, and, C, D]
+
+!(expr-flatten (f A B C D E F G H I))   ;[cons f (cons A (cons B (cons C (cons D (cons E (cons F (cons G (cons H (cons I nil)))))))))]
+!(expr-flatten (implies (human Socrates) (mortal Socrates))) ;[cons implies (cons human (cons Socrates (cons mortal (cons Socrates nil))))]
+!(expr-flatten (and (or A B) (and C D))) 
