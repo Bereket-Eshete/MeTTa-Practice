@@ -49,9 +49,9 @@
             (max (+ 1 $head-depth) $tail-depth))))
      ($_ 0))))
 
-!(expr-depth (human Socrates))                             ; Should be 1
-!(expr-depth (implies (human Socrates) (mortal Socrates))) ; Should be 2
-!(expr-depth human)                                        ; Should be 0
+!(expr-depth (human Socrates))                             ;1
+!(expr-depth (implies (human (person Socrates)) (mortal Socrates))) ;3
+!(expr-depth human)  ;0
 
 ;; ===================================================================== ;;
 ;; EXPRESSION CONTAINS FUNCTION                                          ;;
