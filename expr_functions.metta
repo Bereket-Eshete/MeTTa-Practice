@@ -70,7 +70,7 @@
      ($_ (== $expr $target)))))
 
 !(expr-contains? (human Socrates) Socrates)                   ; True
-!(expr-contains? (implies (human Socrates) (mortal Socrates)) Socrates)  ; Should be True
+!(expr-contains? (implies (human Socrates) (mortal Socrates)) Socrates)  ; True
 !(expr-contains? (f a b c d) c)                               ; True
 !(expr-contains? human Socrates)                              ; False
 !(expr-contains? Socrates Socrates)                           ; True
