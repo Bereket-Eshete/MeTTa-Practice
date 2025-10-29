@@ -79,24 +79,31 @@
 ;; EXPRESSION SUBSTITUTE FUNCTION                                        ;;
 ;; ===================================================================== ;;
 ;; Replaces all occurrences of atom with another atom 
-(: expr-substitute (-> Expression Atom Atom Expression))
+(: expr-substitute (-> Atom Atom Atom Atom))
 (= (expr-substitute $expr $old $new)
-  (case $expr
-    (
-      (($op $arg1 $arg2)
-       ((if (== $op $old) $new $op)
-        (expr-substitute $arg1 $old $new)
-        (expr-substitute $arg2 $old $new)))
-      (($op $arg1)
-       ((if (== $op $old) $new $op)
-        (expr-substitute $arg1 $old $new)))
-      ($atom (if (== $atom $old) $new $atom))
-    )
-  )
-)
-! (expr-substitute (implies (human Socrates) (mortal Socrates)) Socrates Plato) ;(implies (human Plato) (mortal Plato))
-! (expr-substitute (parent John Bob) John "Father") ;(parent "Father" Bob)
-! (expr-substitute (f (g x) (h y)) h  z) ;(f (g x) (z y))
+  (case (get-metatype $expr)
+    ((Expression
+      (case $expr  ; Your proven working pattern
+        (
+          (($op $arg1 $arg2)
+           ((if (== $op $old) $new $op)
+            (expr-substitute $arg1 $old $new)
+            (expr-substitute $arg2 $old $new)))
+          (($op $arg1)
+           ((if (== $op $old) $new $op)
+            (expr-substitute $arg1 $old $new)))
+          ($atom (if (== $atom $old) $new $atom))
+        )
+      ))
+     ($_ (if (== $expr $old) $new $expr)))))  ; Handle non-expression atoms
+
+!(expr-substitute (implies (human Socrates) (mortal Socrates)) Socrates Plato)
+!(expr-substitute (parent John Bob) John "Father") 
+!(expr-substitute (f (g x) (h y)) h z)
+!(expr-substitute human Socrates Plato)  ; Now works with Symbol atoms
+; ! (expr-substitute (implies (human Socrates) (mortal Socrates)) Socrates Plato) ;(implies (human Plato) (mortal Plato))
+; ! (expr-substitute (parent John Bob) John "Father") ;(parent "Father" Bob)
+; ! (expr-substitute (f (g x) (h y)) h  z) ;(f (g x) (z y))
 
 ;; ===================================================================== ;;
 ;; EXPRESSION FLATTEN FUNCTION                                           ;;
