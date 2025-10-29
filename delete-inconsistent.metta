@@ -84,16 +84,16 @@
     )
 )
 
-;; Test the complete implementation
+; Test the complete implementation
 !(deleteInconsistentHandle (OR B (AND (NOT A) (OR B C))) (AND (NOT A) (OR B C)) (A))
-;; Test Case 1: Consistent handle - should NOT apply
+; Test Case 1: Consistent handle - should NOT apply
 !(deleteInconsistentHandle (OR B (AND A (OR B C))) (AND A (OR B C)) (B))
 
-;; Test Case 2: Inconsistent handle - should apply  
+; Test Case 2: Inconsistent handle - should apply  
 !(deleteInconsistentHandle (OR C (AND (NOT B) (OR C D))) (AND (NOT B) (OR C D)) (B))
 
-;; Test Case 3: Empty dominant set, consistent - should NOT apply
+; Test Case 3: Empty dominant set, consistent - should NOT apply
 !(deleteInconsistentHandle (OR D (AND E (OR D F))) (AND E (OR D F)) ())
 
-;; Test Case 4: Complex inconsistent case
+; Test Case 4: Complex inconsistent case
 !(deleteInconsistentHandle (OR X (AND (NOT Y) Z (OR X W))) (AND (NOT Y) Z (OR X W)) (Y))
