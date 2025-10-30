@@ -1,16 +1,24 @@
-;; A function to remove an unnecessary AND and its child.
-;; Definitions: A guard set of a POA is the set of literals in the POA.
-;; Preconditions: The point of application (POA) is and AND node,
-;;                has an empty guard set, one child and
-;;                for each child C of the POA, the intersection
-;;                of the guard sets of the children of C is empty.
-;; Action: If the preconditions are met, the function adds the
-;;            grandChildren of the POA to the POA's parent and returns
-;;            the updated parent, empty atom and a boolean value of
-;;            true.
-;;         If conditions are not met, the function returns the unchanged state.
-;;            updated POA and also a boolean value corresponding to
-;;            whether the transformation function is applied or not.
+;; =============================================================================
+;; andCut - Reduct Rule
+;; =============================================================================
+;; Eliminates redundant AND nodes that serve no logical purpose when they:
+;;   - Contain no guard literals (empty guard set)
+;;   - Have exactly one child expression
+;;   - All grandchildren have mutually exclusive guard sets (no common literals)
+;;
+;; Transformation:
+;;   Removes the unnecessary AND node and promotes its grandchildren directly
+;;   to the parent level, preserving the logical meaning while simplifying
+;;   the expression structure.
+;;
+;; Parameters:
+;;   $parent  - The parent expression containing the AND node to evaluate
+;;   $current - The AND node being considered for elimination (Point of Application)
+;;
+;; Returns: (updated-parent () transformation-applied?)
+;;   - On success: (simplified-parent () True)
+;;   - On failure: (original-parent original-current False)
+;;
 
 ;; Helper functions for andCut
 
