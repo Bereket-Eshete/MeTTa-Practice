@@ -18,14 +18,14 @@
 (: ~= (-> Atom Atom Bool))
 (= (~= $a $b) (not (== $a $b)))
 
-;; Filter functions
+;; Filter functions for literals and children
 (= (filterLiterals $exp)
    (if (== (get-metatype $exp) Symbol)
        (if (or (== $exp AND) (== $exp OR)) (empty) $exp)
        (if (== (car-atom $exp) NOT)
            $exp
            $exp)))
-
+;; filterChildren returns cdr-atom to get all children
 (= (filterChildren $exp)
    (if (== (get-metatype $exp) Symbol)
        (empty)
@@ -42,17 +42,17 @@
        (if (or (== (car-atom $exp) AND) (== (car-atom $exp) OR))
            ()
            $exp)))
-
+;; returns cdr-atom to get all children
 (= (getChildren $exp)
    (if (== (get-metatype $exp) Expression)
        (if (or (== (car-atom $exp) AND) (== (car-atom $exp) OR))
            (cdr-atom $exp)
            ())
        ()))
-
+;; Get both literals and children as a tuple
 (= (getLiteralChildren $expr) 
    ((getLiterals $expr) (getChildren $expr)))
-
+;; Get guard set (literals) from an expression
 (= (getGuardSet $exp)
    (if (== (get-metatype $exp) Expression)
        (if (== (car-atom $exp) OR)
@@ -64,7 +64,7 @@
 
 ;; Helper to get guard sets from a tuple of children
 (= (getGuardSets $children)
-   (if (== $children ())
+   (if (== $children ()) 
        ()
        (let* (($first (car-atom $children))
               ($rest (cdr-atom $children))
@@ -86,7 +86,7 @@
              ()
              (cons-atom $op $filtered)))
        (if (== $expr $common) () $expr)))
-
+;; Remove all occurrences of an element from a tuple
 (= (removeElementFromTuple $common $tuple)
    (if (== $tuple ())
        ()
@@ -98,7 +98,7 @@
              (if (== $filteredRest ())
                  ($first)
                  (cons-atom $first $filteredRest))))))
-
+;; Helpers to add children and literals back to an expression
 (= (addChildren $exp $children)
    (if (== $children ())
        $exp
@@ -115,7 +115,7 @@
          )
          (cons-atom $op $updatedSubExpression)
        )))
-
+;; Helper to add literals back to an expression
 (= (addLiterals $exp $elements)
    (if (== $elements ())
        $exp
@@ -137,7 +137,7 @@
          )
          (cons-atom $op $updatedSubExpression)
        )))
-
+;; concatenate two tuples
 (= (concatTuple $x $y) (union-atom $x $y))
 
 ;; Common literal finding
@@ -195,7 +195,7 @@
                                              (not (== $grandChildrenTemp ())))
                                         (car-atom $grandChildrenTemp)
                                         $grandChildrenTemp))
-                    ;; Intersection check from GitHub version
+                    ;; Find common literals among grandChildren
                     ($allLiterals (getGuardSets $grandChildren))
                     ($common (intersections $allLiterals))
                 )
@@ -215,8 +215,7 @@
         )
     )
 )
-
-;; A helper function used to apply andCut in the until function.
+;; A Helper to apply andCut over a parent expression with multiple children
 (: applyAndCut (-> (Expression Bool (Expression Expression)) (Expression Bool (Expression Expression))))
 (= (applyAndCut ($parent $bool ($child $remainingChildren)))
       (let*
@@ -229,28 +228,6 @@
       )
 )
 
-; ;; Test Case 1: Original working case
-; !(andCut (OR C (AND (OR (AND B D) (NOT E)))) (AND (OR (AND B D) (NOT E))))
-
-; ;; Test Case 2: NOT expression case  
-; !(andCut (OR X (AND (NOT Y))) (AND (NOT Y)))
-
-; ;; Test Case 3: AND with multiple grandchildren
-; !(andCut (AND P Q (AND (OR R S T))) (AND (OR R S T)))
-
-; ;; Test Case 4: Nested AND structures
-; !(andCut (OR A (AND (AND (OR B C)))) (AND (AND (OR B C))))
-
-; ;; Test Case 5: Mixed literals and expressions
-; !(andCut (AND X Y (AND (OR Z (NOT W)))) (AND (OR Z (NOT W))))
-
-; ;; Test Case 6: Complex nested structure
-; !(andCut (OR M (AND (OR (AND N O) (NOT P) Q))) (AND (OR (AND N O) (NOT P) Q)))
-
-; ;; Test Case 7: Case where transformation should NOT apply (AND has guard set)
-; !(andCut (OR F (AND G (OR H I))) (AND G (OR H I)))
-
-; ;; Test Case 8: Case where transformation should NOT apply (AND has multiple children)
-; !(andCut (AND J (AND (OR K L) (OR M N))) (AND (OR K L) (OR M N)))
-
-!(andCut (OR (AND (OR (AND B C) (AND E F)) (OR (AND G H) (AND I J)))) (AND (OR (AND B C) (AND E F)) (OR (AND G H) (AND I J))))
+;; TEST CASES
+!(andCut (OR A (AND B (OR C D))) (AND B (OR C D)))
+!(andCut (OR A (AND (OR (AND B C) (AND E F) (AND G H))) F) (AND (OR (AND B C) (AND E F) (AND G H))))

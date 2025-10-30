@@ -9,10 +9,8 @@
 ;;   - $dominantSet: Set of literals from dominant context
 ;;
 ;; Returns: (updated-parent updated-current transformation-applied?)
-;; =============================================
 
 ;; Helper functions
-
 ;; Filter to keep only literal atoms (NOT expressions and simple symbols)
 (= (filterLiterals $exp)
         (if (== (get-metatype $exp) Symbol)
@@ -36,9 +34,11 @@
         (getLiterals $exp)))
 
 ;; Concatenate two tuples
+(: concatTuple (-> Atom Atom Atom))
 (= (concatTuple $x $y) (union-atom $x $y))
 
 ;; Tuple concatenation with type handling
+(: ++ (-> Atom Atom Atom))
 (= (++ $x $y)
    (case ((isSymbol $x) (isSymbol $y))
       (
@@ -66,7 +66,6 @@
 (= (appendAtom $a $atom) (foldr cons-atom ($a) $atom))
 
 ;; Remove all occurrences of an element from a tuple
-;; Fixed removeElement that preserves expression structure
 (= (removeElement $common $expr)
    (if (== (get-metatype $expr) Expression)
        ;; For expressions: keep operator, filter children
@@ -96,12 +95,10 @@
 (= (isMember $x $list)
     (not (== (collapse (intersection (superpose ($x)) (superpose $list))) ()))
 )
-
 ;; Check if two literals are negations of each other
 (= (areNegations ($a $b))
      (or (== $a (NOT $b)) (== $b (NOT $a)))
 )
-
 ;; Check if a set of literals contains any contradictory pairs (A and NOT A)
 (= (isConsistentExp $handleSet)
     (if (== $handleSet ())
@@ -117,8 +114,8 @@
         )
     )
 )
-
 ;; Main deleteInconsistentHandle function
+(: deleteInconsistentHandle (-> Expression Expression Atom Bool))
 (= (deleteInconsistentHandle $parent $current $dominantSet)
     (let*
         (
@@ -129,8 +126,8 @@
         (if $isConsistent ($parent $current False) ((removeElement $current $parent) () True))
     )
 )
-
-; =============================================
 ; TEST CASES
-; =============================================
 !(deleteInconsistentHandle (OR C (AND A B (OR C D))) (AND A B (OR C D)) (D E))
+!(deleteInconsistentHandle (OR C (AND A (NOT A) (OR C D))) (AND A (NOT A) (OR C D)) (D E))
+!(deleteInconsistentHandle (OR B (AND (NOT A) (OR B C))) (AND (NOT A) (OR B C)) (A))
+!(deleteInconsistentHandle (OR B (AND A (OR B C))) (AND A (OR B C)) ((NOT A)))

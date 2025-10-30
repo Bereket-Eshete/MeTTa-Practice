@@ -6,6 +6,7 @@
     (deleteInconsistentHandle (OR B (AND (NOT A) (OR B C))) (AND (NOT A) (OR B C)) (A))
     ((OR B) () True))
 ;; expected Result [((OR B) () True)]
+
 ;; Test 02: Direct literal negation reverse (NOT A vs A)
 !(assertEqual
     (deleteInconsistentHandle (OR B (AND A (OR B C))) (AND A (OR B C)) ((NOT A)))
