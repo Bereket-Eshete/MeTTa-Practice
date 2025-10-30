@@ -229,29 +229,28 @@
       )
 )
 
-;; Test Case 1: Original working case
-!(andCut (OR C (AND (OR (AND B D) (NOT E)))) (AND (OR (AND B D) (NOT E))))
+; ;; Test Case 1: Original working case
+; !(andCut (OR C (AND (OR (AND B D) (NOT E)))) (AND (OR (AND B D) (NOT E))))
 
-;; Test Case 2: NOT expression case  
-!(andCut (OR X (AND (NOT Y))) (AND (NOT Y)))
+; ;; Test Case 2: NOT expression case  
+; !(andCut (OR X (AND (NOT Y))) (AND (NOT Y)))
 
-;; Test Case 3: AND with multiple grandchildren
-!(andCut (AND P Q (AND (OR R S T))) (AND (OR R S T)))
+; ;; Test Case 3: AND with multiple grandchildren
+; !(andCut (AND P Q (AND (OR R S T))) (AND (OR R S T)))
 
-;; Test Case 4: Nested AND structures
-!(andCut (OR A (AND (AND (OR B C)))) (AND (AND (OR B C))))
+; ;; Test Case 4: Nested AND structures
+; !(andCut (OR A (AND (AND (OR B C)))) (AND (AND (OR B C))))
 
-;; Test Case 5: Mixed literals and expressions
-!(andCut (AND X Y (AND (OR Z (NOT W)))) (AND (OR Z (NOT W))))
+; ;; Test Case 5: Mixed literals and expressions
+; !(andCut (AND X Y (AND (OR Z (NOT W)))) (AND (OR Z (NOT W))))
 
-;; Test Case 6: Complex nested structure
-!(andCut (OR M (AND (OR (AND N O) (NOT P) Q))) (AND (OR (AND N O) (NOT P) Q)))
+; ;; Test Case 6: Complex nested structure
+; !(andCut (OR M (AND (OR (AND N O) (NOT P) Q))) (AND (OR (AND N O) (NOT P) Q)))
 
-;; Test Case 7: Case where transformation should NOT apply (AND has guard set)
-!(andCut (OR F (AND G (OR H I))) (AND G (OR H I)))
+; ;; Test Case 7: Case where transformation should NOT apply (AND has guard set)
+; !(andCut (OR F (AND G (OR H I))) (AND G (OR H I)))
 
-;; Test Case 8: Case where transformation should NOT apply (AND has multiple children)
-!(andCut (AND J (AND (OR K L) (OR M N))) (AND (OR K L) (OR M N)))
+; ;; Test Case 8: Case where transformation should NOT apply (AND has multiple children)
+; !(andCut (AND J (AND (OR K L) (OR M N))) (AND (OR K L) (OR M N)))
 
-
-
+!(andCut (OR (AND (OR (AND B C) (AND E F)) (OR (AND G H) (AND I J)))) (AND (OR (AND B C) (AND E F)) (OR (AND G H) (AND I J))))
